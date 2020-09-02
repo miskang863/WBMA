@@ -5,20 +5,27 @@ import PropTypes from 'prop-types';
 
 const mediaUrl = 'http://media.mw.metropolia.fi/wbma/uploads/';
 
-const ListItem = (props) => {
+const ListItem = ({ navigation, singleMedia }) => {
   return (
-    <TouchableOpacity style={styles.cats}>
+    <TouchableOpacity
+      style={styles.cats}
+      onPress={() => {
+        navigation.navigate('Single', {
+          file: singleMedia,
+        });
+      }}
+    >
       <View style={styles.catCard}>
         <View style={styles.view}>
           <Image
             style={styles.image}
-            source={{ uri: mediaUrl + props.singleMedia.thumbnails.w160 }}
+            source={{ uri: mediaUrl + singleMedia.thumbnails.w160 }}
           />
         </View>
 
         <View style={styles.text}>
-          <Text style={styles.title}>{props.singleMedia.title}</Text>
-          <Text>{props.singleMedia.description}</Text>
+          <Text style={styles.title}>{singleMedia.title}</Text>
+          <Text>{singleMedia.description}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -63,6 +70,7 @@ const styles = StyleSheet.create({
 
 ListItem.propTypes = {
   singleMedia: PropTypes.object,
+  navigation: PropTypes.object,
 };
 
 export default ListItem;
