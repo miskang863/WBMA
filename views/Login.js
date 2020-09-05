@@ -6,6 +6,7 @@ import { StyleSheet, View, Button } from 'react-native';
 import PropTypes from 'prop-types';
 import { AuthContext } from '../contexts/AuthContext';
 import AsyncStorage from '@react-native-community/async-storage';
+import { postLogin, checkToken } from '../hooks/APIhooks';
 
 const Login = ({ navigation }) => {
   // props is needed for navigation
@@ -15,9 +16,15 @@ const Login = ({ navigation }) => {
   const getToken = async () => {
     const userToken = await AsyncStorage.getItem('userToken');
     console.log('token', userToken);
-    if (userToken === 'abc') {
-      setIsLoggedIn(true);
-      navigation.navigate('Home');
+    if (userToken) {
+      try {
+        const userData = await checkToken(userToken);
+        console.log('token valid', userData);
+        setIsLoggedIn(true);
+      } catch (e) {
+        console.log('token check failed: ' + e.message);
+      }
+      // navigation.navigate('Home');
     }
   };
   useEffect(() => {
@@ -25,9 +32,18 @@ const Login = ({ navigation }) => {
   }, []);
 
   const logIn = async () => {
-    setIsLoggedIn(true);
-    await AsyncStorage.setItem('userToken', 'abc');
-    navigation.navigate('Home');
+    try {
+      const userData = await postLogin({
+        username: 'miskang',
+        password: 'pekkapekka123',
+      });
+      console.log('user login success: ', userData);
+      setIsLoggedIn(true);
+      await AsyncStorage.setItem('userToken', userData.token);
+    } catch (e) {
+      console.log('login error: ' + e.message);
+    }
+    // navigation.navigate('Home');
   };
   return (
     <View style={styles.container}>
