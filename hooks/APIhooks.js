@@ -68,4 +68,23 @@ const postLogin = async (userCreds) => {
   }
 };
 
-export { useLoadMedia, postLogin, checkToken };
+const postRegistration = async (newUser) => {
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newUser),
+  };
+  try {
+    const response = await fetch(apiUrl + 'users', options);
+    const result = await response.json();
+    if (response.ok) {
+      return result;
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (e) {
+    throw new Error(e.message);
+  }
+};
+
+export { useLoadMedia, postLogin, checkToken, postRegistration };

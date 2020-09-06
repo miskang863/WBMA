@@ -6,8 +6,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import PropTypes from 'prop-types';
 
 const Profile = (navigation) => {
-  const [isLoggedIn, setIsLoggedIn] = useContext(AuthContext);
-  console.log('profile', isLoggedIn);
+  const { setIsLoggedIn, user } = useContext(AuthContext);
+  console.log('logged in user data: ', user);
   const logout = async () => {
     setIsLoggedIn(false);
     await AsyncStorage.clear();
@@ -15,7 +15,9 @@ const Profile = (navigation) => {
   };
   return (
     <View style={styles.container}>
-      <Text>Profile</Text>
+      <Text>Username: {user.username}</Text>
+      <Text>E-mail: {user.email}</Text>
+      <Text>Full name: {user.full_name}</Text>
       <Button title={'Logout'} onPress={logout} />
     </View>
   );
