@@ -1,19 +1,28 @@
 /* eslint-disable object-curly-spacing */
 /* eslint-disable max-len */
 
-import React, { useContext, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { AuthContext } from '../contexts/AuthContext';
 import AsyncStorage from '@react-native-community/async-storage';
 import { checkToken } from '../hooks/APIhooks';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm';
-import { Container, Content, Icon, Title } from 'native-base';
+import {
+  Container,
+  Content,
+  Icon,
+  Title,
+  Button,
+  Text,
+  View,
+} from 'native-base';
 
 const Login = ({ navigation }) => {
   // props is needed for navigation
   const { setIsLoggedIn, setUser, user } = useContext(AuthContext);
+  const [showRegistration, setShowRegistration] = useState(true);
+
   // console.log('Login: ', isLoggedIn);
 
   const getToken = async () => {
@@ -41,8 +50,22 @@ const Login = ({ navigation }) => {
         <Title>
           <Icon name="planet" style={{ fontSize: 200 }}></Icon>
         </Title>
-        <LoginForm navigation={navigation} />
-        <RegisterForm navigation={navigation} />
+        {showRegistration ? (
+          <LoginForm navigation={navigation} />
+        ) : (
+          <RegisterForm navigation={navigation} />
+        )}
+        <View style={{ alignItems: 'center' }}>
+          <Text>or</Text>
+        </View>
+        <Button
+          block
+          onPress={() => {
+            setShowRegistration(!showRegistration);
+          }}
+        >
+          <Text> {showRegistration ? 'Register' : 'Login'}</Text>
+        </Button>
       </Content>
     </Container>
   );
