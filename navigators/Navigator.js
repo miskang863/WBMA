@@ -7,6 +7,8 @@ import Home from '../views/Home.js';
 import Profile from '../views/Profile.js';
 import Single from '../views/Single.js';
 import Login from '../views/Login.js';
+import Upload from '../views/Upload.js';
+
 import { AuthContext } from '../contexts/AuthContext.js';
 
 const Tab = createBottomTabNavigator();
@@ -18,6 +20,7 @@ const TabScreen = () => {
     <Tab.Navigator>
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Upload" component={Upload} />
     </Tab.Navigator>
   );
 };
