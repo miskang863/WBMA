@@ -8,34 +8,49 @@ import * as Permissions from 'expo-permissions';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-community/async-storage';
-import { upload } from '../hooks/APIhooks';
+import { upload, appIdentifier, postTag } from '../hooks/APIhooks';
 
 const Upload = ({ navigation }) => {
   const [image, setImage] = useState(null);
-  const { handleInputChange, uploadErrors, inputs } = useUploadForm();
+  const { handleInputChange, uploadErrors, inputs, reset } = useUploadForm();
 
   const doUpload = async () => {
-    const formData = new FormData();
-    formData.append('title', inputs.title);
-    formData.append('description', inputs.description);
-    const userToken = await AsyncStorage.getItem('userToken');
+    try {
+      const formData = new FormData();
+      formData.append('title', inputs.title);
+      formData.append('description', inputs.description);
+      const userToken = await AsyncStorage.getItem('userToken');
 
-    // ImagePicker saves the taken photo to disk and returns a local URI to it
+      const filename = image.split('/').pop();
 
-    const filename = image.split('/').pop();
-    console.log(filename);
+      const match = /\.(\w+)$/.exec(filename);
+      let type = match ? `image/${match[1]}` : `image`;
 
-    // Infer the type of the image
-    const match = /\.(\w+)$/.exec(filename);
-    let type = match ? `image/${match[1]}` : `image`;
+      if (type === 'image/jpg') {
+        type = 'image/jpeg';
+      }
+      formData.append('file', { uri: image, name: filename, type });
 
-    if (type === 'image/jpg') {
-      type = 'image/jpeg';
+      const resp = await upload(formData, userToken);
+      console.log('upload', resp);
+
+      const postTagResponse = await postTag(
+        {
+          file_id: resp.file_id,
+          tag: appIdentifier,
+        },
+        userToken
+      );
+      console.log('Posting  tag:', postTagResponse);
+
+      // wait 2s
+      setTimeout(() => {
+        doReset();
+        navigation.push('Home');
+      }, 2000);
+    } catch (e) {
+      console.log('upload error', e.message);
     }
-    formData.append('file', { uri: image, name: filename, type });
-
-    const resp = await upload(formData, userToken);
-    console.log('uppload', resp);
   };
 
   const getPermissionAsync = async () => {
@@ -68,6 +83,12 @@ const Upload = ({ navigation }) => {
     }
   };
 
+  const doReset = () => {
+    reset();
+    setImage(null);
+    console.log(inputs);
+  };
+
   return (
     <Container>
       <Content padder>
@@ -79,12 +100,14 @@ const Upload = ({ navigation }) => {
           <FormTextInput
             autoCapitalize="none"
             placeholder="title"
+            value={inputs.title}
             onChangeText={(txt) => handleInputChange('title', txt)}
             error={uploadErrors.title}
           />
           <FormTextInput
             autoCapitalize="none"
             placeholder="description"
+            value={inputs.description}
             onChangeText={(txt) => handleInputChange('description', txt)}
             error={uploadErrors.description}
           />
@@ -92,8 +115,20 @@ const Upload = ({ navigation }) => {
         <Button block onPress={pickImage}>
           <Text>Choose file</Text>
         </Button>
-        <Button block onPress={doUpload}>
+        <Button
+          block
+          disabled={
+            uploadErrors.title !== null ||
+            uploadErrors.description !== null ||
+            image === null
+          }
+          onPress={doUpload}
+        >
           <Text>Upload</Text>
+        </Button>
+
+        <Button block onPress={doReset}>
+          <Text>RESET MOTHAFUKHA</Text>
         </Button>
       </Content>
     </Container>
