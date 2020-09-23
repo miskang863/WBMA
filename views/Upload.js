@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Container, Content, Form, Text } from 'native-base';
+import { Button, Container, Content, Form, Spinner, Text } from 'native-base';
 import FormTextInput from '../components/FormTextInput';
 import { Image, Platform } from 'react-native';
 import useUploadForm from '../hooks/UploadHooks';
@@ -9,28 +9,30 @@ import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-community/async-storage';
 import { upload, appIdentifier, postTag } from '../hooks/APIhooks';
+import { Video } from 'expo-av';
 
 const Upload = ({ navigation }) => {
   const [image, setImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fileType, setFileType] = useState('image');
+
   const { handleInputChange, uploadErrors, inputs, reset } = useUploadForm();
 
   const doUpload = async () => {
+    setIsLoading(true);
     try {
       const formData = new FormData();
       formData.append('title', inputs.title);
       formData.append('description', inputs.description);
-      const userToken = await AsyncStorage.getItem('userToken');
 
       const filename = image.split('/').pop();
-
       const match = /\.(\w+)$/.exec(filename);
-      let type = match ? `image/${match[1]}` : `image`;
-
+      let type = match ? `${fileType}/${match[1]}` : fileType;
       if (type === 'image/jpg') {
         type = 'image/jpeg';
       }
       formData.append('file', { uri: image, name: filename, type });
-
+      const userToken = await AsyncStorage.getItem('userToken');
       const resp = await upload(formData, userToken);
       console.log('upload', resp);
 
@@ -50,6 +52,8 @@ const Upload = ({ navigation }) => {
       }, 2000);
     } catch (e) {
       console.log('upload error', e.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +79,7 @@ const Upload = ({ navigation }) => {
       });
       if (!result.cancelled) {
         setImage(result.uri);
+        setFileType(result.type);
       }
 
       console.log(result);
@@ -92,10 +97,22 @@ const Upload = ({ navigation }) => {
   return (
     <Container>
       <Content padder>
-        <Image
-          source={{ uri: image }}
-          style={{ width: null, height: 200, flex: 1 }}
-        />
+        {image && (
+          <>
+            {fileType === 'image' ? (
+              <Image
+                source={{ uri: image }}
+                style={{ width: null, height: 200, flex: 1 }}
+              />
+            ) : (
+              <Video
+                source={{ uri: image }}
+                style={{ width: null, height: 200, flex: 1 }}
+                useNativeControls={true}
+              />
+            )}
+          </>
+        )}
         <Form>
           <FormTextInput
             autoCapitalize="none"
@@ -115,6 +132,7 @@ const Upload = ({ navigation }) => {
         <Button block onPress={pickImage}>
           <Text>Choose file</Text>
         </Button>
+        {isLoading && <Spinner />}
         <Button
           block
           disabled={
@@ -128,7 +146,7 @@ const Upload = ({ navigation }) => {
         </Button>
 
         <Button block onPress={doReset}>
-          <Text>RESET MOTHAFUKHA</Text>
+          <Text>RESET</Text>
         </Button>
       </Content>
     </Container>

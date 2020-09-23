@@ -162,6 +162,28 @@ const postTag = async (tag, token) => {
   }
 };
 
+const getUser = async (id, token) => {
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': token,
+    },
+  };
+  console.log('postTag options:', options);
+  try {
+    const response = await fetch(apiUrl + 'users/' + id, options);
+    const result = await response.json();
+    if (response.ok) {
+      return result;
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (e) {
+    throw new Error(e.message);
+  }
+};
+
 export {
   useLoadMedia,
   postLogin,
@@ -172,4 +194,5 @@ export {
   upload,
   appIdentifier,
   postTag,
+  getUser,
 };
