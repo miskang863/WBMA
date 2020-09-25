@@ -11,10 +11,23 @@ import {
   Button,
   Icon,
 } from 'native-base';
+import { deleteFile } from '../hooks/APIhooks';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const mediaUrl = 'http://media.mw.metropolia.fi/wbma/uploads/';
 
-const ListItem = ({ navigation, singleMedia }) => {
+const ListItem = ({ navigation, singleMedia, editable }) => {
+  const doDelete = async () => {
+    try {
+      const userToken = await AsyncStorage.getItem('userToken');
+      const result = await deleteFile(singleMedia.file_id, userToken);
+      console.log('delete file', result);
+      navigation.replace('MyFiles');
+      // todo add alert (react native alert)
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return (
     <NBListItem thumbnail>
       <Left>
@@ -41,72 +54,33 @@ const ListItem = ({ navigation, singleMedia }) => {
           <Icon name={'eye'}></Icon>
           <Text>View</Text>
         </Button>
+        {editable && (
+          <>
+            <Button
+              success
+              transparent
+              onPress={() => {
+                navigation.navigate('Modify', { file: singleMedia });
+              }}
+            >
+              <Icon name={'create'}></Icon>
+              <Text>Modify</Text>
+            </Button>
+            <Button danger transparent onPress={doDelete}>
+              <Icon name={'trash'}></Icon>
+              <Text>Delete</Text>
+            </Button>
+          </>
+        )}
       </Right>
     </NBListItem>
-    // <TouchableOpacity
-    //   style={styles.cats}
-    //   onPress={() => {
-    //     navigation.navigate('Single', {
-    //       file: singleMedia,
-    //     });
-    //   }}
-    // >
-    //   <View style={styles.catCard}>
-    //     <View style={styles.view}>
-    //       <Image
-    //         style={styles.image}
-    //         source={{ uri: mediaUrl + singleMedia.thumbnails.w160 }}
-    //       />
-    //     </View>
-
-    //     <View style={styles.text}>
-    //       <Text style={styles.title}>{singleMedia.title}</Text>
-    //       <Text>{singleMedia.description}</Text>
-    //     </View>
-    //   </View>
-    // </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  cats: {
-    padding: 10,
-    flex: 1,
-  },
-  catCard: {
-    backgroundColor: 'lightgrey',
-    flexDirection: 'row',
-    borderWidth: 2,
-    borderRadius: 25,
-    alignItems: 'center',
-    flex: 1,
-  },
-  view: {
-    flex: 1,
-    paddingLeft: 5,
-  },
-  image: {
-    height: 100,
-    width: 100,
-    borderRadius: 50,
-  },
-  title: {
-    color: 'orange',
-    fontWeight: 'bold',
-    fontSize: 15,
-    padding: 15,
-    fontFamily: 'serif',
-  },
-  text: {
-    flex: 2,
-    padding: 10,
-    fontFamily: 'serif',
-  },
-});
 
 ListItem.propTypes = {
   singleMedia: PropTypes.object,
   navigation: PropTypes.object,
+  editable: PropTypes.bool,
 };
 
 export default ListItem;

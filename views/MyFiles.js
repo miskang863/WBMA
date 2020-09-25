@@ -6,7 +6,7 @@ import List from '../components/List';
 import { StatusBar } from 'expo-status-bar';
 import PropTypes from 'prop-types';
 
-const Home = (props) => {
+const MyFiles = (props) => {
   const { navigation } = props;
   return (
     <View style={styles.container}>
@@ -25,7 +25,7 @@ const Home = (props) => {
           <Text style={styles.text}>Kisumirri</Text>
         </View>
       </View>
-      <List navigation={navigation} style={styles.list} all={true}></List>
+      <List navigation={navigation} style={styles.list} all={false}></List>
     </View>
   );
 };
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
   text: { padding: 3, paddingLeft: 6, fontFamily: 'serif' },
 });
 
-Home.propTypes = {
+MyFiles.propTypes = {
   navigation: PropTypes.object,
 };
 
-export default Home;
+export default MyFiles;

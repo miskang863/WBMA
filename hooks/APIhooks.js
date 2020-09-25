@@ -7,14 +7,15 @@ import axios from 'axios';
 const apiUrl = 'http://media.mw.metropolia.fi/wbma/';
 const appIdentifier = 'JS770F';
 
-const useLoadMedia = () => {
+const useLoadMedia = (all, userId) => {
   const [mediaArray, setMediaArray] = useState([]);
+
   const loadMedia = async () => {
     try {
       // const response = await fetch(apiUrl + 'media');
       const response = await fetch(apiUrl + 'tags/' + appIdentifier);
       const json = await response.json();
-      const media = await Promise.all(
+      let media = await Promise.all(
         json.map(async (item) => {
           const resp2 = await fetch(apiUrl + 'media/' + item.file_id);
           const json2 = await resp2.json();
@@ -22,7 +23,16 @@ const useLoadMedia = () => {
         })
       );
       // console.log('loadMedia', media);
-      setMediaArray(media);
+      if (all) {
+        console.log('all media', media);
+        setMediaArray(media);
+      } else {
+        media = media.filter((item) => {
+          console.log('filtering item', item.user_id, userId);
+          return item.user_id == userId;
+        });
+        setMediaArray(media);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -139,6 +149,48 @@ const upload = async (fd, token) => {
   }
 };
 
+const deleteFile = async (fileId, token) => {
+  const options = {
+    method: 'DELETE',
+    headers: {
+      'x-access-token': token,
+    },
+  };
+  try {
+    const response = await fetch(apiUrl + 'media/' + fileId, options);
+    const result = await response.json();
+    if (response.ok) {
+      return result;
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (e) {
+    throw new Error(e.message);
+  }
+};
+
+const updateFile = async (fileId, fileInfo, token) => {
+  const options = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': token,
+    },
+    body: JSON.stringify(fileInfo),
+  };
+  try {
+    const response = await fetch(apiUrl + 'media/' + fileId, options);
+    const result = await response.json();
+    if (response.ok) {
+      return result;
+    } else {
+      throw new Error(result.message);
+    }
+  } catch (e) {
+    throw new Error(e.message);
+  }
+};
+
 const postTag = async (tag, token) => {
   const options = {
     method: 'POST',
@@ -148,7 +200,6 @@ const postTag = async (tag, token) => {
     },
     body: JSON.stringify(tag),
   };
-  console.log('postTag options:', options);
   try {
     const response = await fetch(apiUrl + 'tags', options);
     const result = await response.json();
@@ -195,4 +246,6 @@ export {
   appIdentifier,
   postTag,
   getUser,
+  deleteFile,
+  updateFile,
 };

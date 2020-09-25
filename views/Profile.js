@@ -1,9 +1,8 @@
-/* eslint-disable object-curly-spacing */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Image } from 'react-native';
 import { AuthContext } from '../contexts/AuthContext';
-import AsyncStorage from '@react-native-community/async-storage';
 import PropTypes from 'prop-types';
+import AsyncStorage from '@react-native-community/async-storage';
 import {
   Container,
   Content,
@@ -18,7 +17,7 @@ import { getAvatar } from '../hooks/APIhooks';
 
 const mediaUrl = 'http://media.mw.metropolia.fi/wbma/uploads/';
 
-const Profile = (navigation) => {
+const Profile = ({ navigation }) => {
   const { setIsLoggedIn, user } = useContext(AuthContext);
   const [avatar, setAvatar] = useState([{ filename: '' }]);
 
@@ -30,14 +29,14 @@ const Profile = (navigation) => {
     fetchAvatar();
   }, []);
 
-  console.log('Profile.js', avatar);
-  console.log('logged in user data: ', user);
+  console.log('Profile.js', avatar[0].filename);
+
+  console.log('logged in user data:', user);
   const logout = async () => {
     setIsLoggedIn(false);
     await AsyncStorage.clear();
     navigation.navigate('Login');
   };
-
   return (
     <Container>
       <Content padder>
@@ -53,16 +52,26 @@ const Profile = (navigation) => {
                 style={{ height: 400, width: null, flex: 1 }}
               />
             </CardItem>
-            <CardItem>
+            <CardItem bordered>
               <Body>
-                <Text>Fullname: {user.fullname}</Text>
+                <Text>Fullname: {user.full_name}</Text>
                 <Text>Email: {user.email}</Text>
               </Body>
             </CardItem>
-            <CardItem>
-              <Button block onPress={logout}>
-                <Text>Logout</Text>
-              </Button>
+            <CardItem bordered>
+              <Body>
+                <Button block onPress={logout}>
+                  <Text>Logout</Text>
+                </Button>
+                <Button
+                  block
+                  onPress={() => {
+                    navigation.navigate('MyFiles');
+                  }}
+                >
+                  <Text>My files</Text>
+                </Button>
+              </Body>
             </CardItem>
           </Card>
         )}

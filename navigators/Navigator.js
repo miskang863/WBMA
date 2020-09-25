@@ -1,18 +1,17 @@
-/* eslint-disable object-curly-spacing */
 import React, { useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import Home from '../views/Home.js';
-import Profile from '../views/Profile.js';
-import Single from '../views/Single.js';
-import Login from '../views/Login.js';
-import Upload from '../views/Upload.js';
-
-import { AuthContext } from '../contexts/AuthContext.js';
+import { NavigationContainer } from '@react-navigation/native';
+import Home from '../views/Home';
+import Profile from '../views/Profile';
+import Single from '../views/Single';
+import Login from '../views/Login';
+import { AuthContext } from '../contexts/AuthContext';
+import Upload from '../views/Upload';
+import MyFiles from '../views/MyFiles';
+import Modify from '../views/Modify';
 
 const Tab = createBottomTabNavigator();
-
 const Stack = createStackNavigator();
 
 const TabScreen = () => {
@@ -33,6 +32,8 @@ const StackScreen = () => {
         <>
           <Stack.Screen name="Home" component={TabScreen} />
           <Stack.Screen name="Single" component={Single} />
+          <Stack.Screen name="MyFiles" component={MyFiles} />
+          <Stack.Screen name="Modify" component={Modify} />
         </>
       ) : (
         <>
